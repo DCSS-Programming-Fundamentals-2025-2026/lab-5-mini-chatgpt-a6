@@ -1,0 +1,95 @@
+﻿using System.Text.Json;
+
+public class NGramModel : ILanguageModel
+{
+    public float[][] _probs; 
+    public int VocabSize { get; set; }
+    private NGramCounts counts = new NGramCounts();
+    public string ModelKind { get; }
+
+    public NGramModel(int vocabSize) 
+    {
+        VocabSize = vocabSize;
+        _probs = new float[vocabSize][];
+        ModelKind = "bigram";
+
+        for (int i = 0; i < vocabSize; i++)
+        {
+            _probs[i] = new float[vocabSize];
+        }
+    }
+
+    public void Train(ReadOnlySpan<int> tokens)
+    {
+        if (tokens.Length < 2)
+        {
+            return;
+        }
+
+        counts.CountBigrams(_probs, tokens);
+
+        for (int i = 0; i < VocabSize; i++)
+        {
+            int countForRow = counts.GetBigramPrevTotal(_probs, VocabSize, i);
+
+            if (countForRow != 0)
+            {
+                for (int j = 0; j < VocabSize; j++)
+                {
+                    _probs[i][j] = _probs[i][j] / countForRow;
+                }
+            }
+        }
+    }
+
+    public float[] NextTokenScores(ReadOnlySpan<int> context)
+    {
+        float[] alternative = new float[VocabSize];
+        for (int i = 0; i < VocabSize; i++)
+        {
+            alternative[i] = (float)1 / VocabSize;
+        }
+
+        if (context.Length < 1)
+        {
+            return alternative;
+        }
+
+        int lastToken = context[context.Length - 1];       
+
+        if (lastToken < 0 || lastToken >= VocabSize)
+        {
+            return alternative;
+        }
+
+        bool isNull = true;
+
+        for (int i = 0; i < VocabSize; i++)
+        {
+            if (_probs[lastToken][i] != 0)
+            {
+                isNull = false;
+                break;
+            }
+        }
+
+        if (!isNull)
+        {
+            return _probs[lastToken];
+        }
+
+        return alternative;
+    }
+
+    public void FromPayload(JsonElement json)
+    {
+        NGramPayloadMapper mapper = new NGramPayloadMapper();
+        mapper.FromJsonElementToBigram(json, this);
+    }
+
+    public JsonElement GetPayloadForCheckpoint()
+    {
+        NGramPayloadMapper mapper = new NGramPayloadMapper();      
+        return mapper.FromBigramToJson(this);
+    }
+}
