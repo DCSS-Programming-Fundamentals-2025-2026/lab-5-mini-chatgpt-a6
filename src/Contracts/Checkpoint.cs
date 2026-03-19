@@ -6,6 +6,5 @@ public record Checkpoint(
     object TokenizerPayload,
     object ModelPayload,
     int Seed,
-
     string ContractFingerprintChain
 );

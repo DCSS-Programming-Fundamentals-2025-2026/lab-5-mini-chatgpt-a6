@@ -16,11 +16,13 @@ public sealed class NGramModel : ILanguageModel
     {
         if (vocabSize <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(vocabSize),"VocabSize must be positive.");
+            throw new ArgumentOutOfRangeException(nameof(vocabSize), "VocabSize must be positive.");
         }
+
         VocabSize = vocabSize;
         _probs = new float[vocabSize, vocabSize];
     }
+
     private NGramModel(float[,] probs)
     {
         _probs = probs;
@@ -32,7 +34,7 @@ public sealed class NGramModel : ILanguageModel
         if (tokens.Length < 2)
         {
             return;
-        } 
+        }
 
         var counts = new NGramCounts(VocabSize);
 
@@ -40,19 +42,20 @@ public sealed class NGramModel : ILanguageModel
         {
             counts.RecordBigram(tokens[i], tokens[i + 1]);
         }
+
         for (int prev = 0; prev < VocabSize; prev++)
         {
             int total = counts.GetBigramPrevTotal(prev);
+
             if (total == 0)
             {
-                continue; 
-            } 
+                continue;
+            }
 
             for (int next = 0; next < VocabSize; next++)
             {
                 _probs[prev, next] = (float)counts.GetBigramCount(prev, next) / total;
             }
-                
         }
     }
 
@@ -69,7 +72,9 @@ public sealed class NGramModel : ILanguageModel
         {
             return Uniform();
         }
+
         float rowSum = 0f;
+
         for (int i = 0; i < VocabSize; i++)
         {
             rowSum += _probs[last, i];
@@ -79,15 +84,21 @@ public sealed class NGramModel : ILanguageModel
         {
             return Uniform();
         }
+
         var result = new float[VocabSize];
+
         for (int i = 0; i < VocabSize; i++)
         {
             result[i] = _probs[last, i];
         }
+
         return result;
     }
 
-    public object GetPayloadForCheckpoint() => NGramPayloadMapper.SerializeBigram(_probs, VocabSize);
+    public object GetPayloadForCheckpoint()
+    {
+        return NGramPayloadMapper.SerializeBigram(_probs, VocabSize);
+    }
 
     public static NGramModel FromPayload(JsonElement payload)
     {
@@ -95,7 +106,10 @@ public sealed class NGramModel : ILanguageModel
         return new NGramModel(probs);
     }
 
-    public static string GetContractFingerprint() => "Lib.Models.NGram:v1.0.0:bigram";
+    public static string GetContractFingerprint()
+    {
+        return "Lib.Models.NGram:v1.0.0:bigram";
+    }
 
     internal float[,] Probs => _probs;
 
@@ -103,10 +117,12 @@ public sealed class NGramModel : ILanguageModel
     {
         var result = new float[VocabSize];
         float val = 1.0f / VocabSize;
+
         for (int i = 0; i < VocabSize; i++)
         {
             result[i] = val;
         }
+
         return result;
     }
 }
