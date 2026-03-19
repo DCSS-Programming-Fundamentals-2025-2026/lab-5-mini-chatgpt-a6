@@ -3,11 +3,13 @@
 public class NGramModel
 {
     public float[][] _probs; 
-    public int VocabSize; 
+    public int VocabSize;
+    private NGramCounts counts;
 
     public NGramModel(int vocabSize) 
     {
         VocabSize = vocabSize;
+        counts = new NGramCounts();
         _probs = new float[vocabSize][];
 
         for (int i = 0; i < vocabSize; i++)
@@ -18,18 +20,16 @@ public class NGramModel
 
     public void Train(ReadOnlySpan<int> tokens)
     {
-        for (int i = 1; i < tokens.Length; i++)
+        if (tokens.Length < 2)
         {
-            _probs[tokens[i - 1]][tokens[i]]++;
+            return;
         }
+
+        counts.CountBigrams(_probs, tokens);
 
         for (int i = 0; i < VocabSize; i++)
         {
-            int countForRow = 0;
-            for (int j = 0; j < VocabSize; j++)
-            {
-                countForRow += (int)_probs[i][j];
-            }
+            int countForRow = counts.GetBigramPrevTotal(_probs, VocabSize, i);
 
             if (countForRow != 0)
             {
@@ -98,10 +98,13 @@ public class TrigramModel
     public Dictionary<(int, int), float[]> _trigramProbs = new Dictionary<(int, int), float[]>();
     public NGramModel bigramModel;
     public int VocabSize;
+    private NGramCounts counts;
 
     public TrigramModel(int vocabSize)
     {
         VocabSize = vocabSize;
+        counts = new NGramCounts();
+        bigramModel = new NGramModel(VocabSize);
 
         for (int i = 0; i < vocabSize; i++)
         {
@@ -114,30 +117,27 @@ public class TrigramModel
 
     public void Train(ReadOnlySpan<int> tokens)
     {
-        for (int i = 2; i < tokens.Length; i++)
+        bigramModel.Train(tokens);
+
+        if (tokens.Length < 3)
         {
-            _trigramProbs[(tokens[i-2], tokens[i-1])][tokens[i]]++;
+            return;
         }
+
+        counts.CountTrigrams(_trigramProbs, tokens);
 
         foreach (var bigram in _trigramProbs)
         {
-            int count = 0;
-            for (int j = 0; j < bigram.Value.Length; j++)
-            {
-                count += (int)bigram.Value[j];
-            }
+            int countForPair = counts.GetTrigramPrevsTotal(_trigramProbs, bigram.Key);
 
             for (int j = 0; j < bigram.Value.Length; j++)
             {
-                if (count != 0)
+                if (countForPair != 0)
                 {
-                    bigram.Value[j] = bigram.Value[j] / count;
+                    bigram.Value[j] = bigram.Value[j] / countForPair;
                 }
             }
         }
-
-        bigramModel = new NGramModel(VocabSize);
-        bigramModel.Train(tokens);
     }
 
     public float[] NextTokenScores(ReadOnlySpan<int> context)
@@ -258,6 +258,49 @@ public class NGramPayloadMapper
         }
 
         model._trigramProbs = oldDictionary;
+    }
+}
+
+public class NGramCounts
+{
+    public void CountBigrams(float[][] probs, ReadOnlySpan<int> tokens)
+    {
+        for (int i = 1; i < tokens.Length; i++)
+        {
+            probs[tokens[i - 1]][tokens[i]]++;
+        }
+    }
+
+    public void CountTrigrams(Dictionary<(int, int), float[]> probs, ReadOnlySpan<int> tokens)
+    {
+        for (int i = 2; i < tokens.Length; i++)
+        {
+            probs[(tokens[i - 2], tokens[i - 1])][tokens[i]]++;
+        }
+    }
+
+    public int GetBigramPrevTotal(float[][] probs, int vocabSize, int prev)
+    {
+        int sum = 0;
+
+        for (int i = 0; i < vocabSize; i++)
+        {
+            sum += (int)probs[prev][i];
+        }
+
+        return sum;
+    }
+
+    public int GetTrigramPrevsTotal(Dictionary<(int, int), float[]> probs, (int, int) pair)
+    {
+        int sum = 0;
+
+        for (int j = 0; j < probs[pair].Length; j++)
+        {
+            sum += (int)probs[pair][j];
+        }
+
+        return sum;
     }
 }
 
