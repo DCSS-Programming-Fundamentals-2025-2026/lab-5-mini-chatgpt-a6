@@ -24,16 +24,64 @@ public class TrigramModel : ILanguageModel
         }
     }
 
+    public override bool Equals(object? obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (obj is not TrigramModel model)
+        {
+            return false;
+        }
+
+        if (model.ModelKind != this.ModelKind 
+            || model.VocabSize != this.VocabSize 
+            || !model.bigramModel.Equals(this.bigramModel))
+        {
+            return false;
+        }
+
+        foreach (var pair in _trigramProbs)
+        {
+            for (int i = 0; i < VocabSize; i++)
+            {
+                if (model._trigramProbs[pair.Key][i] != this._trigramProbs[pair.Key][i])
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public void Train(ReadOnlySpan<int> tokens)
     {
-        bigramModel.Train(tokens);
+        try
+        {
+            bigramModel.Train(tokens);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            throw;
+        }
 
         if (tokens.Length < 3)
         {
             return;
         }
 
-        counts.CountTrigrams(_trigramProbs, tokens);
+        try
+        {
+            counts.CountTrigrams(_trigramProbs, tokens);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            throw;
+        }
+        
 
         foreach (var bigram in _trigramProbs)
         {

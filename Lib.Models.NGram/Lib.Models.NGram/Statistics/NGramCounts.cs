@@ -2,8 +2,15 @@
 {
     public void CountBigrams(float[][] probs, ReadOnlySpan<int> tokens)
     {
+        
         for (int i = 1; i < tokens.Length; i++)
         {
+            if (tokens[i] < 0 || tokens[i] >= probs.Length ||
+                tokens[i - 1] < 0 || tokens[i - 1] >= probs.Length)
+            {
+                throw new ArgumentOutOfRangeException("Token out of vocabulary range");
+            }
+
             probs[tokens[i - 1]][tokens[i]]++;
         }
     }
@@ -12,6 +19,14 @@
     {
         for (int i = 2; i < tokens.Length; i++)
         {
+            if (tokens[i] < 0 || tokens[i] >= probs[(0, 0)].Length ||
+                tokens[i - 1] < 0 || tokens[i - 1] >= probs[(0, 0)].Length ||
+                tokens[i - 2] < 0 || tokens[i - 2] >= probs[(0, 0)].Length
+                )
+            {
+                throw new ArgumentOutOfRangeException("Token out of vocabulary range");
+            }
+
             probs[(tokens[i - 2], tokens[i - 1])][tokens[i]]++;
         }
     }

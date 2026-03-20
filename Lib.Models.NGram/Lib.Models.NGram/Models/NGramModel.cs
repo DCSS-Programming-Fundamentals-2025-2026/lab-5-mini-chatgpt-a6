@@ -19,6 +19,37 @@ public class NGramModel : ILanguageModel
         }
     }
 
+    public override bool Equals(object? obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+
+        if (obj is not NGramModel model)
+        {
+            return false;
+        }
+
+        if (model.ModelKind != this.ModelKind || model.VocabSize != this.VocabSize)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < VocabSize; i++)
+        {
+            for (int j = 0; j < VocabSize; j++)
+            {
+                if (model._probs[i][j] != this._probs[i][j])
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public void Train(ReadOnlySpan<int> tokens)
     {
         if (tokens.Length < 2)
@@ -26,7 +57,15 @@ public class NGramModel : ILanguageModel
             return;
         }
 
-        counts.CountBigrams(_probs, tokens);
+        try
+        {
+            counts.CountBigrams(_probs, tokens);
+        }
+        catch (ArgumentOutOfRangeException ex)
+        {
+            throw;
+        }
+        
 
         for (int i = 0; i < VocabSize; i++)
         {
