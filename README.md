@@ -70,10 +70,7 @@ Lib.Models.NGram.sln
 |---|---|---|
 | `ModelKind` | `string { get; }` | Ідентифікатор типу: `"bigram"`, `"trigram"` |
 | `VocabSize` | `int { get; }` | Розмір словника |
-| `Train` | `(ReadOnlySpan<int> tokens) → void` | Навчання на масиві токенів |
 | `NextTokenScores` | `(ReadOnlySpan<int> context) → float[]` | Ймовірності для наступного токена |
-| `FromPayload` | `(JsonElement json) → void` | Відновлення стану з checkpoint |
-| `GetPayloadForCheckpoint` | `() → JsonElement` | Серіалізація стану для збереження |
 
 ### `INgramModelFactory`
 
