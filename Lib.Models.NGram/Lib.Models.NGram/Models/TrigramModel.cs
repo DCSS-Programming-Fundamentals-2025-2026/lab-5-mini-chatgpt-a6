@@ -24,6 +24,11 @@ public class TrigramModel : ILanguageModel
         }
     }
 
+    public string GetContractFingerprint()
+    {
+        return $"V1_{ModelKind}:vocabSize={VocabSize}";
+    }
+
     public override bool Equals(object? obj)
     {
         if (obj == null)

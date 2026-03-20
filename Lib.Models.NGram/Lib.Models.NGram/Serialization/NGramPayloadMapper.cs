@@ -10,7 +10,8 @@ public class NGramPayloadMapper
             modelPayload = new
             {
                 bigramProbs = model._probs
-            }
+            },
+            contractFingerprintChain = $"|Lib.Models.NGram: {model.GetContractFingerprint()}|"
         };
 
         string json = JsonSerializer.Serialize(obj);
@@ -42,7 +43,8 @@ public class NGramPayloadMapper
             {
                 bigramProbs = model.bigramModel._probs,
                 trigramProbs = temp
-            }
+            },
+            contractFingerprintChain = $"|Lib.Models.NGram: {model.GetContractFingerprint()}|"
         };
 
         string json = JsonSerializer.Serialize(obj);
