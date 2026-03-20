@@ -16,17 +16,46 @@
 ## Структура
 
 ```
-Lib.Models.NGram/
-├── Statistics/
-│   └── NGramCounts.cs
-├── Serialization/
-│   └── NGramPayloadMapper.cs
-├── Metrics/
-│   └── PerplexityCalculator.cs
-├── NGramModel.cs
-├── TrigramModel.cs
-├── INGramModelFactory.cs
-└── NGramModelFactory.cs
+Lib.Models.NGram.sln
+│
+├── Lib.Models.NGram
+│   ├── Interfaces
+│   │   ├── ILanguageModel.cs
+│   │   └── INGramModelFactory.cs
+│   │
+│   ├── Metrics
+│   │   └── PerplexityCalculator.cs
+│   │
+│   ├── Models
+│   │   ├── NGramModel.cs
+│   │   └── TrigramModel.cs
+│   │
+│   ├── Serialization
+│   │   └── NGramPayloadMapper.cs
+│   │
+│   ├── Statistics
+│   │   └── NGramCounts.cs
+│   │
+│   ├── NGramModelFactory.cs
+│   └── Lib.Models.NGram.csproj
+│
+├── Lib.Models.NGram.Tests
+│   ├── Metrics
+│   │   └── PerplexityCalculator.Tests.cs
+│   │
+│   ├── Models
+│   │   ├── NGramModel.Tests.cs
+│   │   └── TrigramModel.Tests.cs
+│   │
+│   ├── Statistics
+│   │   └── NGramCounts.Tests.cs
+│   │
+│   ├── NGramModelFactory.Tests.cs
+│   └── Lib.Models.NGram.Tests.csproj
+│
+├── .gitignore
+└── README.md
+
 ```
 
 ---
