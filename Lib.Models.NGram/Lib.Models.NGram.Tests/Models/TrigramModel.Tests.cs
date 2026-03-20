@@ -98,7 +98,7 @@
     }
 
     [Test]
-    public void NextTokenScores_OnlyNulls()
+    public void NextTokenScores_OnlyZeros()
     {
         // Arrange
         TrigramModel model = new TrigramModel(4);
@@ -121,7 +121,7 @@
     public void NextTokenScores_NewToken()
     {
         // Arrange
-        TrigramModel model = new TrigramModel(3);
+        TrigramModel model = new TrigramModel(4);
         int[] tokens = { 2, 1, 0, 1, 0, 2, 1, 0, 1, 2 };
         model.Train(tokens);
 
@@ -131,9 +131,10 @@
         float[] resultProbs = model.NextTokenScores(context);
 
         // Assert
-        Assert.That(resultProbs[0], Is.EqualTo((float)1 / 3).Within(1e-5));
-        Assert.That(resultProbs[1], Is.EqualTo((float)1 / 3).Within(1e-5));
-        Assert.That(resultProbs[2], Is.EqualTo((float)1 / 3).Within(1e-5));
+        Assert.That(resultProbs[0], Is.EqualTo((float)1 / 4).Within(1e-5));
+        Assert.That(resultProbs[1], Is.EqualTo((float)1 / 4).Within(1e-5));
+        Assert.That(resultProbs[2], Is.EqualTo((float)1 / 4).Within(1e-5));
+        Assert.That(resultProbs[3], Is.EqualTo((float)1 / 4).Within(1e-5));
     }
 
     [Test]
