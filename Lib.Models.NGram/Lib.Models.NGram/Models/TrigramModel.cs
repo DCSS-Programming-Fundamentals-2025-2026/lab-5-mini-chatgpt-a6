@@ -131,7 +131,7 @@ public class TrigramModel : ILanguageModel
 
         if (!isNull)
         {
-            return _trigramProbs[(beforeLastToken, lastToken)];
+            return (float[])_trigramProbs[(beforeLastToken, lastToken)].Clone();
         }
 
         return bigramModel.NextTokenScores(context);

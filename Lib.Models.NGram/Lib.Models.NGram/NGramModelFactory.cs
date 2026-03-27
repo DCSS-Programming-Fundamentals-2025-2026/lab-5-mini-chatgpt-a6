@@ -1,4 +1,4 @@
-﻿public class NGramModelFactory : INgramModelFactory
+﻿public class NGramModelFactory : INGramModelFactory
 {
     public ILanguageModel Create(string modelType, int vocabSize)
     {

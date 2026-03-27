@@ -119,7 +119,7 @@ public class NGramModel : ILanguageModel
 
         if (!isNull)
         {
-            return _probs[lastToken];
+            return (float[])_probs[lastToken].Clone();
         }
 
         return alternative;
