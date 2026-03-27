@@ -61,9 +61,33 @@ public class TrigramModel : ILanguageModel
 
         return true;
     }
+    public void ResetTrainingResults()
+    {
+        counts = new NGramCounts();
+
+        if (bigramModel != null)
+        {
+            bigramModel.ResetTrainingResults();
+        }
+        else
+        {
+            bigramModel = new NGramModel(VocabSize);
+        }
+
+        _trigramProbs.Clear();
+        for (int i = 0; i < VocabSize; i++)
+        {
+            for (int j = 0; j < VocabSize; j++)
+            {
+                _trigramProbs.Add((i, j), new float[VocabSize]);
+            }
+        }
+    }
 
     public void Train(ReadOnlySpan<int> tokens)
     {
+        ResetTrainingResults();
+
         try
         {
             bigramModel.Train(tokens);

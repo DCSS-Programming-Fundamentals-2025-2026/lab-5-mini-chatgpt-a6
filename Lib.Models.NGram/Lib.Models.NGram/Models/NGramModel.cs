@@ -55,12 +55,25 @@ public class NGramModel : ILanguageModel
         return true;
     }
 
+    public void ResetTrainingResults()
+    {
+        counts = new NGramCounts();
+
+        _probs = new float[VocabSize][];
+        for (int i = 0; i < VocabSize; i++)
+        {
+            _probs[i] = new float[VocabSize];
+        }
+    }
+
     public void Train(ReadOnlySpan<int> tokens)
     {
         if (tokens.Length < 2)
         {
             return;
         }
+
+        ResetTrainingResults();
 
         try
         {
@@ -70,7 +83,6 @@ public class NGramModel : ILanguageModel
         {
             throw;
         }
-        
 
         for (int i = 0; i < VocabSize; i++)
         {
